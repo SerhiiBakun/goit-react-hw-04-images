@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Gallery } from './ImageGallery.styled';
 import { ImageGalleryItem } from './ImageGalleryItem/ImageGalleryItem';
 
@@ -14,4 +15,9 @@ export const ImageGallery = ({ items, openModal }) => {
       ))}
     </Gallery>
   );
+};
+
+ImageGallery.propTypes = {
+  items: PropTypes.array,
+  openModal: PropTypes.func,
 };

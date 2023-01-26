@@ -1,83 +1,70 @@
 import { Button } from 'components/Button/Button';
 import { ImageGallery } from 'components/ImageGallery/ImageGallery';
 import { SearchBar } from 'components/Searchbar/Searchbar';
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { fetchImg } from 'services/api';
 import { AppStyled } from './App.styled';
 import { Loader } from 'components/Loader/Loader';
 import { Modal } from 'components/Modal/Modal';
 
-export class App extends Component {
-  state = {
-    page: 1,
-    query: '',
-    items: [],
-    loading: false,
-    showModal: false,
-    choosedId: '',
-  };
+export function App() {
+  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState('');
+  const [items, setItems] = useState([]);
+  const [laoding, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState();
+  const [choosedId, setChoosedId] = useState('');
 
-  async componentDidUpdate(_, prevState) {
-    if (
-      prevState.page !== this.state.page ||
-      prevState.query !== this.state.query
-    ) {
-      const { query, page } = this.state;
-      this.setState({ loading: true });
+  useEffect(() => {
+    if (!query) {
+      return;
+    }
+    setLoading(true);
+    const fetch = async () => {
       try {
         const response = await fetchImg(query, page);
-        this.setState(({ items }) => ({ items: [...items, ...response.hits] }));
+        setItems(items => [...items, ...response.hits]);
       } catch (error) {
         console.log(error);
       } finally {
-        this.setState({ loading: false });
+        setLoading(false);
       }
-    }
-  }
+    };
+    fetch();
+  }, [page, query]);
 
-  handleSubmit = query => {
-    this.setState(prevState => {
-      if (prevState.query !== query) {
-        return {
-          page: 1,
-          query: query,
-          items: [],
-        };
+  const handleSubmit = query => {
+    setQuery(prevQuery => {
+      if (prevQuery !== query) {
+        setPage(1);
+        setQuery(query);
+        setItems([]);
       }
     });
   };
 
-  loadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const openModal = id => {
+    setShowModal(true);
+    setChoosedId(id);
   };
 
-  openModal = id => {
-    this.setState({
-      showModal: true,
-      choosedId: id,
-    });
+  const closeModal = () => {
+    setShowModal(false);
   };
 
-  closeModal = () => {
-    this.setState({ showModal: false });
+  const loadMore = () => {
+    setPage(page => page + 1);
   };
 
-  render() {
-    const { items, loading, showModal, choosedId } = this.state;
-    const chosedItem = items.filter(item => item.id === choosedId)[0];
+  const chosedItem = items.filter(item => item.id === choosedId)[0];
 
-    return (
-      <AppStyled>
-        {showModal && <Modal item={chosedItem} closeModal={this.closeModal} />}
-        <SearchBar onSubmit={this.handleSubmit} />
-        {items.length > 0 && (
-          <ImageGallery items={items} openModal={this.openModal} />
-        )}
-        {loading && <Loader />}
-        {items.length > 0 && <Button loadMore={this.loadMore} />}
-      </AppStyled>
-    );
-  }
+  return (
+    <AppStyled>
+      {showModal && <Modal item={chosedItem} closeModal={closeModal} />}
+      <SearchBar onSubmit={handleSubmit} />
+      {items.length > 0 && <ImageGallery items={items} openModal={openModal} />}
+      {laoding && <Loader />}
+      {items.length > 0 && <Button loadMore={loadMore} />}
+    </AppStyled>
+  );
 }
