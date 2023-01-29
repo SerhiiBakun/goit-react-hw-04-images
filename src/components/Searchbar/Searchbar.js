@@ -9,12 +9,12 @@ export function SearchBar({ onSubmit }) {
   const handleSubmit = e => {
     e.preventDefault();
     onSubmit(query);
-    setQuery('');
-    e.target.reset();
+    localStorage.setItem('query', JSON.stringify(query));
   };
 
   const handleChange = e => {
     const { name, value } = e.target;
+
     switch (name) {
       case 'query':
         setQuery(value);
@@ -44,5 +44,5 @@ export function SearchBar({ onSubmit }) {
 }
 
 SearchBar.propTypes = {
-  onSubmit: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
 };

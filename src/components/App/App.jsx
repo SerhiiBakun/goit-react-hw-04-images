@@ -33,14 +33,12 @@ export function App() {
     fetch();
   }, [page, query]);
 
-  const handleSubmit = query => {
-    setQuery(prevQuery => {
-      if (prevQuery !== query) {
-        setPage(1);
-        setQuery(query);
-        setItems([]);
-      }
-    });
+  const handleSubmit = val => {
+    if (val !== query) {
+      setPage(1);
+      setQuery(val);
+      setItems([]);
+    }
   };
 
   const openModal = id => {
